@@ -383,7 +383,7 @@
   position: absolute;
   top: 0;
   inset-inline: 0;
-  height: 305px;
+  height: 260px;
   pointer-events: none;
   /* Light mode deliberately runs HIGHER than dark, which looks backwards but
      isn't: on near-black the band only has to out-shine the surface to read, so
@@ -397,6 +397,21 @@
 /* Your value — dark mode reads correctly at this strength, leave it alone. */
 .dark .hero-aurora {
   opacity: 0.42;
+}
+
+/* Both tuned against desktop Chrome. A real phone's WebGL/canvas compositing
+   (Safari on iOS, an actual GPU) renders the same shader more vividly than
+   desktop Chrome does even under device-toolbar emulation — the emulator
+   fakes the viewport, not the rendering engine. This scopes lower values to
+   narrow screens only, so the desktop values above are untouched. */
+@media (max-width: 639px) {
+  .hero-aurora {
+    opacity: 0.48;
+  }
+
+  .dark .hero-aurora {
+    opacity: 0.3;
+  }
 }
 
 @media (min-width: 640px) {
