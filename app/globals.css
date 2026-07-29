@@ -1,0 +1,604 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   Design tokens
+   Brand: coral (identity), blue (buttons / actions), amber (AI / warmth),
+   teal (info / focus).
+   Light theme is off-white — never pure #fff except for "paper" surfaces.
+   Dark theme is a very dark neutral gray, not black.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Brand ramp — fixed across themes */
+  --brand-coral: #f85a40;
+  --brand-coral-soft: #ff7a63;
+  --brand-amber: #f48924;
+  --brand-amber-soft: #ffa54d;
+  --brand-teal: #0cb9c1;
+  --brand-teal-soft: #38d3da;
+  --brand-blue: #037ef3;
+  --brand-blue-soft: #3697f6;
+  --brand-blue-foreground: #ffffff;
+  --brand-mist: #f5f5f5;
+
+  /* Surfaces */
+  --background: #f5f5f5;
+  --surface: #fbfbfa;
+  --card: #ffffff;
+  --card-foreground: #17171a;
+  --popover: #ffffff;
+  --popover-foreground: #17171a;
+  --elevated: #ffffff;
+
+  /* Text */
+  --foreground: #17171a;
+  --muted: #ececea;
+  --muted-foreground: #64646e;
+  --subtle-foreground: #8a8a94;
+
+  /* Semantic */
+  --primary: #f85a40;
+  --primary-foreground: #ffffff;
+  --secondary: #ececea;
+  --secondary-foreground: #17171a;
+  --accent: #0cb9c1;
+  --accent-foreground: #ffffff;
+  --highlight: #f48924;
+  --highlight-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  /* Lines & controls */
+  --border: #e2e2df;
+  --border-strong: #d2d2ce;
+  --input: #ffffff;
+  --ring: #0cb9c1;
+
+  /* Sidebar */
+  --sidebar: #fbfbfa;
+  --sidebar-foreground: #17171a;
+  --sidebar-primary: #f85a40;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ececea;
+  --sidebar-accent-foreground: #17171a;
+  --sidebar-border: #e2e2df;
+  --sidebar-ring: #0cb9c1;
+
+  /* Charts (kept for shadcn compatibility) */
+  --chart-1: #f85a40;
+  --chart-2: #f48924;
+  --chart-3: #0cb9c1;
+  --chart-4: #8a8a94;
+  --chart-5: #17171a;
+
+  --radius: 0.75rem;
+
+  /* Ripple grid */
+  --cell-border: rgba(23, 23, 26, 0.055);
+  --cell-fill: rgba(23, 23, 26, 0.015);
+  --cell-hover: rgba(248, 90, 64, 0.1);
+
+  /* Elevation — soft and neutral, never blue-black */
+  --shadow-xs: 0 1px 2px rgba(23, 23, 26, 0.05);
+  --shadow-sm: 0 1px 3px rgba(23, 23, 26, 0.06), 0 1px 2px rgba(23, 23, 26, 0.04);
+  --shadow-md: 0 4px 16px rgba(23, 23, 26, 0.07), 0 1px 3px rgba(23, 23, 26, 0.04);
+  --shadow-lg: 0 12px 40px rgba(23, 23, 26, 0.1), 0 2px 8px rgba(23, 23, 26, 0.04);
+  --shadow-paper: 0 1px 2px rgba(23, 23, 26, 0.06), 0 8px 32px rgba(23, 23, 26, 0.1);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --brand-coral: #ff6b52;
+  --brand-coral-soft: #ff8a75;
+  --brand-amber: #ffa03a;
+  --brand-amber-soft: #ffb769;
+  --brand-teal: #22cdd5;
+  --brand-teal-soft: #5ce0e6;
+  /* Held at the light-theme hex — the blue already reads vivid on a dark
+     surface, and lifting it would cost white-text contrast. */
+  --brand-blue: #037ef3;
+  --brand-blue-soft: #3d9bf7;
+  --brand-blue-foreground: #ffffff;
+  --brand-mist: #f5f5f5;
+
+  --background: #0e0e10;
+  --surface: #141416;
+  --card: #18181b;
+  --card-foreground: #f2f2f0;
+  --popover: #1b1b1f;
+  --popover-foreground: #f2f2f0;
+  --elevated: #202024;
+
+  --foreground: #f2f2f0;
+  --muted: #26262b;
+  --muted-foreground: #a1a1aa;
+  --subtle-foreground: #7c7c85;
+
+  --primary: #ff6b52;
+  --primary-foreground: #1a0a06;
+  --secondary: #26262b;
+  --secondary-foreground: #f2f2f0;
+  --accent: #22cdd5;
+  --accent-foreground: #05201f;
+  --highlight: #ffa03a;
+  --highlight-foreground: #1f1200;
+  --destructive: #f4635f;
+  --destructive-foreground: #22090a;
+
+  --border: #2a2a30;
+  --border-strong: #3a3a42;
+  --input: #1b1b1f;
+  --ring: #22cdd5;
+
+  --sidebar: #141416;
+  --sidebar-foreground: #f2f2f0;
+  --sidebar-primary: #ff6b52;
+  --sidebar-primary-foreground: #1a0a06;
+  --sidebar-accent: #26262b;
+  --sidebar-accent-foreground: #f2f2f0;
+  --sidebar-border: #2a2a30;
+  --sidebar-ring: #22cdd5;
+
+  --chart-1: #ff6b52;
+  --chart-2: #ffa03a;
+  --chart-3: #22cdd5;
+  --chart-4: #a1a1aa;
+  --chart-5: #f2f2f0;
+
+  --cell-border: rgba(242, 242, 240, 0.042);
+  --cell-fill: rgba(242, 242, 240, 0.012);
+  --cell-hover: rgba(255, 107, 82, 0.12);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-paper: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* Map tokens onto Tailwind's theme so `bg-card`, `text-brand-teal`, … exist */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-elevated: var(--elevated);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-coral: var(--brand-coral);
+  --color-brand-coral-soft: var(--brand-coral-soft);
+  --color-brand-amber: var(--brand-amber);
+  --color-brand-amber-soft: var(--brand-amber-soft);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-teal-soft: var(--brand-teal-soft);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-soft: var(--brand-blue-soft);
+  --color-brand-blue-foreground: var(--brand-blue-foreground);
+  --color-brand-mist: var(--brand-mist);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.35);
+  --radius-2xl: calc(var(--radius) * 1.75);
+  --radius-3xl: calc(var(--radius) * 2.25);
+
+  --shadow-soft-xs: var(--shadow-xs);
+  --shadow-soft-sm: var(--shadow-sm);
+  --shadow-soft-md: var(--shadow-md);
+  --shadow-soft-lg: var(--shadow-lg);
+  --shadow-paper: var(--shadow-paper);
+
+  --animate-grid-ripple: grid-ripple 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --animate-rise: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.5s ease-out both;
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+}
+
+/* Transform + opacity only, so the ripple stays on the compositor. */
+@keyframes grid-ripple {
+  from {
+    opacity: 0.9;
+    transform: scale(0.02);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-synthesis-weight: none;
+  }
+
+  /* One consistent focus treatment across the whole app */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) * 0.5);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--brand-coral) 26%, transparent);
+    color: var(--foreground);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Utilities ---------------------------------------------------------------- */
+
+@utility text-gradient-brand {
+  background-image: linear-gradient(
+    100deg,
+    var(--brand-coral) 0%,
+    var(--brand-amber) 45%,
+    var(--brand-teal) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility scrollbar-slim {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* App-locked layout (builder). Marketing pages scroll normally. */
+.app-locked,
+.app-locked body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+  background-clip: content-box;
+}
+
+/* Hero grid backdrop ------------------------------------------------------- */
+
+/* Frame for the WebGL aurora (components/Aurora.tsx). A shallow band pinned to
+   the top edge: the shader paints brightest at its top and thins downward, and
+   the mask finishes the job, so the colour has died out before it reaches the
+   headline. Height is the only thing that changes per breakpoint. */
+.hero-aurora {
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  height: 305px;
+  pointer-events: none;
+  /* Light mode deliberately runs HIGHER than dark, which looks backwards but
+     isn't: on near-black the band only has to out-shine the surface to read, so
+     a little goes a long way. Against #f5f5f5 it is competing with a bright
+     surface, and anything subtle composites straight back to grey. */
+  opacity: 0.68;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 26%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 26%, transparent 100%);
+}
+
+/* Your value — dark mode reads correctly at this strength, leave it alone. */
+.dark .hero-aurora {
+  opacity: 0.42;
+}
+
+@media (min-width: 640px) {
+  .hero-aurora {
+    height: 312px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-aurora {
+    height: 360px;
+  }
+}
+
+/* Dissolves the grid and the auroras into the page background. Kept short and
+   pinned to the bottom so the grid is still there behind the separator and
+   only gives out just after it. */
+.hero-fade {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 32%;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, var(--background) 78%);
+}
+
+/* Keeps the ripple grid from fighting the copy for attention. Reaches further
+   down than it looks — the backdrop now spans the group marks too, and the grid
+   has to survive as far as the separator before .hero-fade takes over. */
+.hero-mask {
+  -webkit-mask-image: radial-gradient(ellipse 85% 82% at 50% 34%, #000 34%, transparent 88%);
+  mask-image: radial-gradient(ellipse 85% 82% at 50% 34%, #000 34%, transparent 88%);
+}
+
+/* contentEditable has no placeholder attribute, so it gets drawn manually. The
+   :empty test is not enough on its own — a browser leaves a stray <br> behind
+   after the last character is deleted, which counts as a child. */
+.rich-input:empty::before,
+.rich-input:has(> br:only-child)::before {
+  content: attr(data-placeholder);
+  color: var(--subtle-foreground);
+  pointer-events: none;
+}
+
+/* Type roles. Each template declares its own `--cv-*-base` size for a role and
+   the builder supplies a multiplier, so a template keeps its own proportions
+   while any single role can still be pushed up or down on its own. Sizes are
+   real font sizes rather than a page zoom, so the page reflows and print
+   pagination follows. */
+.cv-name {
+  font-size: calc(var(--cv-name-base) * var(--cv-name-scale, 1));
+}
+
+.cv-links {
+  font-size: calc(var(--cv-links-base) * var(--cv-links-scale, 1));
+}
+
+.cv-section-title {
+  font-size: calc(var(--cv-title-base) * var(--cv-title-scale, 1));
+}
+
+.cv-entry-title {
+  font-size: calc(var(--cv-entry-base) * var(--cv-entry-scale, 1));
+}
+
+.cv-summary {
+  font-size: calc(var(--cv-summary-base) * var(--cv-summary-scale, 1));
+  line-height: var(--cv-leading, 1.5);
+}
+
+.cv-body {
+  font-size: calc(var(--cv-body-base) * var(--cv-body-scale, 1));
+  line-height: var(--cv-leading, 1.5);
+}
+
+.cv-dates {
+  font-size: calc(var(--cv-dates-base) * var(--cv-dates-scale, 1));
+}
+
+/* Paper — the CV preview surface. Always light, in both themes. */
+.paper {
+  background: #ffffff;
+  color: #17171a;
+  box-shadow: var(--shadow-paper);
+}
+
+/* Section decoration — the hero's grid and glow, dialled down enough to sit
+   behind ordinary content. Both are static: no shader, no animation, nothing
+   that costs a frame. The grid deliberately reuses --cell-border and the 56px
+   cell of the interactive hero grid so the two read as the same surface. */
+.deco-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--cell-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--cell-border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 78% 68% at 50% 42%, #000 18%, transparent 78%);
+  mask-image: radial-gradient(ellipse 78% 68% at 50% 42%, #000 18%, transparent 78%);
+}
+
+.deco-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 38% at 10% 0%, color-mix(in oklab, var(--brand-teal) 11%, transparent) 0%, transparent 70%),
+    radial-gradient(44% 36% at 90% 6%, color-mix(in oklab, var(--brand-coral) 9%, transparent) 0%, transparent 68%),
+    radial-gradient(52% 34% at 50% 100%, color-mix(in oklab, var(--brand-amber) 7%, transparent) 0%, transparent 72%);
+}
+
+/* Step connectors ("How it works"). Each hairline spans the column gap and
+   takes the accent of whichever card it touches — its own on the left, the
+   following one on the right. --tint and --next-tint are set per item in the
+   markup. This lives here rather than in class names because reaching the
+   connector from the card on its *right* means selecting a previous sibling,
+   which only :has() can express. */
+.step-item > .step-connector {
+  background-color: var(--border);
+  transition: background-color 300ms ease;
+}
+
+.step-item:hover > .step-connector {
+  background-color: var(--tint);
+}
+
+.step-item:has(+ .step-item:hover) > .step-connector {
+  background-color: var(--next-tint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print — only the CV paper reaches the page ------------------------------- */
+
+/* Zero margin on purpose. The browser draws the date, document title, URL and
+   page numbers *into the @page margin box*, and no CSS property turns them off
+   — leaving the box no room is the only way to be rid of them. The document's
+   own margin comes from padding on .print-container below. */
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body,
+  .app-locked,
+  .app-locked body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #cv-print-root,
+  #cv-print-root * {
+    visibility: visible !important;
+  }
+
+  #cv-print-root {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  /* The page margin, now that @page has none. Overrides the template's own
+     screen padding so the printed sheet is not left to whichever Tailwind
+     breakpoint happened to apply at print time. */
+  #cv-print-root .print-container {
+    padding: 11mm !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  a {
+    color: #17171a !important;
+    text-decoration: none !important;
+  }
+
+  .cv-section,
+  .cv-entry {
+    break-inside: avoid;
+  }
+}
