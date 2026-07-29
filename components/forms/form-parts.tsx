@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Lightbulb, Plus, Trash2, type LucideIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import { Lightbulb, Plus, Trash2, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export interface FieldGuideContent {
-  points: string[]
-  example: string
+  points: string[];
+  example: string;
 }
 
 /** Label + control + optional hint, with consistent spacing everywhere. */
@@ -21,19 +21,19 @@ export function Field({
   className,
   children,
 }: {
-  label: string
-  htmlFor: string
-  hint?: string
+  label: string;
+  htmlFor: string;
+  hint?: string;
   /** Writing guidance. Adds a "View hint" toggle beside the label. */
-  guide?: FieldGuideContent
-  required?: boolean
-  className?: string
-  children: React.ReactNode
+  guide?: FieldGuideContent;
+  required?: boolean;
+  className?: string;
+  children: React.ReactNode;
 }) {
-  const [guideOpen, setGuideOpen] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false);
 
   return (
-    <div className={cn('flex flex-col gap-1.5', className)}>
+    <div className={cn("flex flex-col gap-1.5", className)}>
       <div className="flex items-center gap-2.5">
         <Label htmlFor={htmlFor}>
           {label}
@@ -48,7 +48,7 @@ export function Field({
             className="inline-flex items-center gap-1 text-xs font-medium text-brand-blue transition-opacity hover:opacity-80"
           >
             <Lightbulb className="size-3.5" />
-            {guideOpen ? 'Hide hint' : 'View hint'}
+            {guideOpen ? "Hide hint" : "View hint"}
           </button>
         )}
       </div>
@@ -56,9 +56,11 @@ export function Field({
       {guide && guideOpen && <FieldGuidePanel {...guide} />}
 
       {children}
-      {hint && <p className="text-xs leading-relaxed text-subtle-foreground">{hint}</p>}
+      {hint && (
+        <p className="text-xs leading-relaxed text-subtle-foreground">{hint}</p>
+      )}
     </div>
-  )
+  );
 }
 
 /**
@@ -74,19 +76,23 @@ function FieldGuidePanel({ points, example }: FieldGuideContent) {
         ))}
       </ul>
 
-      <div className="mt-3 border-l-2 border-brand-blue/40 pl-3">
-        <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-subtle-foreground">
+      <div className="mt-2">
+        <p className="text-[0.7rem] text-brand-coral font-semibold uppercase tracking-wider ">
           Example
         </p>
-        <p className="mt-1 text-sm leading-relaxed text-foreground">{example}</p>
+        <p className="mt-1 text-sm leading-relaxed text-foreground">
+          {example}
+        </p>
       </div>
     </div>
-  )
+  );
 }
 
 /** Two fields side by side on anything wider than a phone. */
 export function FieldRow({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
+  );
 }
 
 /** One repeatable entry (a job, a degree, …). */
@@ -97,11 +103,11 @@ export function EntryCard({
   deleteLabel,
   children,
 }: {
-  title: string
-  index: number
-  onDelete: () => void
-  deleteLabel: string
-  children: React.ReactNode
+  title: string;
+  index: number;
+  onDelete: () => void;
+  deleteLabel: string;
+  children: React.ReactNode;
 }) {
   return (
     <li className="group relative rounded-xl border border-border bg-card p-4 shadow-soft-xs transition-shadow duration-200 focus-within:shadow-soft-sm sm:p-5">
@@ -110,7 +116,9 @@ export function EntryCard({
           <span className="grid size-6 shrink-0 place-items-center rounded-md bg-muted text-[0.7rem] font-semibold tabular-nums text-muted-foreground">
             {index + 1}
           </span>
-          <h4 className="truncate text-sm font-semibold text-foreground">{title}</h4>
+          <h4 className="truncate text-sm font-semibold text-foreground">
+            {title}
+          </h4>
         </div>
         <Button
           onClick={onDelete}
@@ -125,7 +133,7 @@ export function EntryCard({
       </div>
       <div className="flex flex-col gap-4">{children}</div>
     </li>
-  )
+  );
 }
 
 /** Shown in place of the list when a section has no entries yet. */
@@ -136,11 +144,11 @@ export function SectionEmpty({
   actionLabel,
   onAction,
 }: {
-  icon: LucideIcon
-  title: string
-  body: string
-  actionLabel: string
-  onAction: () => void
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  actionLabel: string;
+  onAction: () => void;
 }) {
   return (
     <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border-strong bg-card/40 px-6 py-10 text-center">
@@ -158,23 +166,29 @@ export function SectionEmpty({
         {actionLabel}
       </Button>
     </div>
-  )
+  );
 }
 
 /** The "add another" button under a non-empty list. */
-export function AddMoreButton({ label, onClick }: { label: string; onClick: () => void }) {
+export function AddMoreButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong bg-transparent px-4 py-3.5',
-        'text-sm font-medium text-muted-foreground transition-colors duration-150',
-        'hover:border-primary/50 hover:bg-primary/5 hover:text-primary',
+        "flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong bg-transparent px-4 py-3.5",
+        "text-sm font-medium text-muted-foreground transition-colors duration-150",
+        "hover:border-primary/50 hover:bg-primary/5 hover:text-primary",
       )}
     >
       <Plus className="size-4" />
       {label}
     </button>
-  )
+  );
 }

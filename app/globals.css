@@ -431,14 +431,15 @@
   mask-image: radial-gradient(ellipse 85% 82% at 50% 34%, #000 34%, transparent 88%);
 }
 
-/* contentEditable has no placeholder attribute, so it gets drawn manually. The
-   :empty test is not enough on its own — a browser leaves a stray <br> behind
-   after the last character is deleted, which counts as a child. */
-.rich-input:empty::before,
-.rich-input:has(> br:only-child)::before {
+/* contentEditable has no placeholder attribute. Tiptap's Placeholder extension
+   marks the empty paragraph itself (not the editor root) with this class, so
+   the rule targets that node rather than the `.rich-input` container. */
+.rich-input p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   color: var(--subtle-foreground);
   pointer-events: none;
+  float: left;
+  height: 0;
 }
 
 /* Type roles. Each template declares its own `--cv-*-base` size for a role and

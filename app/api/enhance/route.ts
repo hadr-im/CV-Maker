@@ -35,7 +35,6 @@ Rules:
 - Only include tools, numbers, or results that are explicitly stated or directly implied in the raw notes — never fabricate metrics or outcomes.
 - If the raw notes are too short or vague to produce 3 distinct, meaningful bullets, produce fewer rather than pad with invented content — but never fewer than 1.
 - Match the language of the raw notes (respond in the same language the person wrote in).
-- Each bullet starts with "• ".
 - Return ONLY the bullet points, nothing else — no preamble, no headers, no explanation.`
 
     const { text } = await generateText({
