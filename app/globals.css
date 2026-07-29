@@ -477,11 +477,17 @@
   font-size: calc(var(--cv-dates-base) * var(--cv-dates-scale, 1));
 }
 
-/* Paper — the CV preview surface. Always light, in both themes. */
+/* Paper — the CV preview surface. Always light, in both themes.
+   `aspect-ratio` (A4, 210:297) only sets the *minimum* height a block with
+   `height: auto` resolves to — a CV shorter than one page still reads as a
+   full sheet instead of leaving the panel's own background showing beneath
+   it, while a longer one is free to grow past the ratio uncropped. Real
+   pagination onto page 2, 3, etc. happens in the exported PDF, via @page. */
 .paper {
   background: #ffffff;
   color: #17171a;
   box-shadow: var(--shadow-paper);
+  aspect-ratio: 210 / 297;
 }
 
 /* Section decoration — the hero's grid and glow, dialled down enough to sit

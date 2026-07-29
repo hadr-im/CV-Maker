@@ -109,8 +109,11 @@ export function PreviewPanel() {
             }
             className={cn(
               // Square corners on purpose: this is meant to read as a sheet of
-              // paper, and paper does not have rounded corners.
-              'paper mx-auto w-full max-w-[46rem] overflow-hidden',
+              // paper, and paper does not have rounded corners. Not
+              // `overflow-hidden`: `.paper`'s `aspect-ratio` only acts as a
+              // floor on an overflow-visible box — a CV longer than one page
+              // needs to grow past it, not get clipped at the page edge.
+              'paper mx-auto w-full max-w-[46rem]',
               'transition-shadow duration-300',
             )}
           >

@@ -15,8 +15,8 @@ export function SkillsForm() {
     addSkill({ id: crypto.randomUUID(), category: '', skills: [] })
   }
 
-  const commitDraft = (id: string, current: string[]) => {
-    const draft = (drafts[id] ?? '').trim().replace(/,$/, '').trim()
+  const commitDraft = (id: string, current: string[], rawValue: string) => {
+    const draft = rawValue.trim().replace(/,$/, '').trim()
     if (!draft) return
     // Accept a pasted comma-separated list as well as a single skill.
     const additions = draft
@@ -73,12 +73,15 @@ export function SkillsForm() {
                 onChange={(event) => {
                   const value = event.target.value
                   setDrafts((previous) => ({ ...previous, [entry.id]: value }))
-                  if (value.endsWith(',')) commitDraft(entry.id, entry.skills)
+                  // Committed from the event's own value, not the `drafts` state — that
+                  // state read is still one render behind at this point in the handler,
+                  // which silently dropped a pasted "a, b," on the floor.
+                  if (value.endsWith(',')) commitDraft(entry.id, entry.skills, value)
                 }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     event.preventDefault()
-                    commitDraft(entry.id, entry.skills)
+                    commitDraft(entry.id, entry.skills, drafts[entry.id] ?? '')
                   }
                   if (
                     event.key === 'Backspace' &&
@@ -88,7 +91,7 @@ export function SkillsForm() {
                     updateSkill(entry.id, { skills: entry.skills.slice(0, -1) })
                   }
                 }}
-                onBlur={() => commitDraft(entry.id, entry.skills)}
+                onBlur={() => commitDraft(entry.id, entry.skills, drafts[entry.id] ?? '')}
                 placeholder="Excel, Salesforce, Photoshop…"
               />
             </Field>
