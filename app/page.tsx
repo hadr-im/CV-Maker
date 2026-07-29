@@ -310,24 +310,22 @@ export default function HomePage() {
 
         {/* --------------------------------------------------------- Brand mark */}
         <section className="relative isolate overflow-hidden py-20 sm:py-28">
-          <div className="logo-glow z-0" />
-
           <div className="relative z-10 flex justify-center px-5 sm:px-8">
             {/* Both marks ship; CSS picks one. Swapping via the theme hook would
                 mean a client component and a flash of the wrong logo on load. */}
             <Image
               src="/logo-black.png"
               alt="CV Maker"
-              width={2048}
-              height={2048}
-              className="size-40 dark:hidden sm:size-52"
+              width={2100}
+              height={2100}
+              className="size-36 dark:hidden sm:size-44"
             />
             <Image
               src="/logo-white.png"
               alt="CV Maker"
-              width={2048}
-              height={2048}
-              className="hidden size-40 dark:block sm:size-52"
+              width={2100}
+              height={2100}
+              className="hidden size-36 dark:block sm:size-44"
             />
           </div>
         </section>
