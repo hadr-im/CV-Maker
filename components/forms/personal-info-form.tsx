@@ -36,7 +36,7 @@ export function PersonalInfoForm() {
           onChange={(event) =>
             updatePersonalInfo({ fullName: event.target.value })
           }
-          placeholder="Amine Boudaga"
+          placeholder="John Doe"
           autoComplete="name"
         />
       </Field>
@@ -156,16 +156,16 @@ export function PersonalInfoForm() {
         guide={SUMMARY_GUIDE}
         hint={`${personalInfo.summary.length}/${SUMMARY_LIMIT}`}
       >
-          <Textarea
-            id="summary"
-            value={personalInfo.summary}
-            maxLength={SUMMARY_LIMIT}
-            onChange={(event) =>
-              updatePersonalInfo({ summary: event.target.value })
-            }
-            placeholder="Third-year computer science student…"
-            className="min-h-28"
-          />
+        <Textarea
+          id="summary"
+          value={personalInfo.summary}
+          maxLength={SUMMARY_LIMIT}
+          onChange={(event) =>
+            updatePersonalInfo({ summary: event.target.value })
+          }
+          placeholder="Third-year computer science student…"
+          className="min-h-28"
+        />
       </Field>
     </div>
   );

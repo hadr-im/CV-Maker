@@ -509,6 +509,18 @@
     radial-gradient(52% 34% at 50% 100%, color-mix(in oklab, var(--brand-amber) 7%, transparent) 0%, transparent 72%);
 }
 
+/* Two fields flanking the brand mark — amber on the left, blue on the right,
+   with the logo sitting in the gap between them. Static gradients, same as
+   .deco-glow. */
+.logo-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 62% at 2% 50%, color-mix(in oklab, var(--brand-amber) 20%, transparent) 0%, transparent 72%),
+    radial-gradient(38% 62% at 98% 50%, color-mix(in oklab, var(--brand-blue) 20%, transparent) 0%, transparent 72%);
+}
+
 /* Step connectors ("How it works"). Each hairline spans the column gap and
    takes the accent of whichever card it touches — its own on the left, the
    following one on the right. --tint and --next-tint are set per item in the
@@ -551,13 +563,16 @@
 }
 
 @media print {
+  /* No background override here. Chrome applies print styles to the live page
+     while the dialog is open, so forcing white flashed the whole app from dark
+     to white and back on every export. The sheet itself is painted white by
+     #cv-print-root below, and page backgrounds are not printed by default. */
   html,
   body,
   .app-locked,
   .app-locked body {
     height: auto !important;
     overflow: visible !important;
-    background: #ffffff !important;
   }
 
   body * {

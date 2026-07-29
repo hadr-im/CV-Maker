@@ -1,64 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Download, FileWarning } from 'lucide-react'
+import { Download, FileWarning } from 'lucide-react'
 
 import { useCV } from '@/lib/cv-context'
 import { TEMPLATES, isCVEmpty } from '@/lib/cv-sections'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { ClassicTemplate } from '@/components/templates/classic-template'
 import { MinimalTemplate } from '@/components/templates/minimal-template'
 import { ModernTemplate } from '@/components/templates/modern-template'
 import { cn } from '@/lib/utils'
 
-/** Seconds before the thank-you page takes over once the dialog closes. */
-const REDIRECT_DELAY = 5
-
 export function PreviewPanel() {
-  const { cvData, template, typography } = useCV()
+  const { cvData, template, typography, reset } = useCV()
   const router = useRouter()
-  const [printing, setPrinting] = useState(false)
-  const [countdown, setCountdown] = useState<number | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const empty = isCVEmpty(cvData)
   const activeTemplate = TEMPLATES.find((item) => item.id === template)
 
-  // `afterprint` fires for a cancelled dialog exactly as it does for a saved
-  // one, and the browser exposes nothing that separates them. Rather than guess,
-  // the redirect happens on a visible countdown the user can stop — saving takes
-  // you onward without a click, and cancelling costs one.
-  useEffect(() => {
-    if (!printing) return
-
-    const onAfterPrint = () => {
-      setPrinting(false)
-      setCountdown(REDIRECT_DELAY)
-    }
-
-    window.addEventListener('afterprint', onAfterPrint)
-    return () => window.removeEventListener('afterprint', onAfterPrint)
-  }, [printing])
-
-  useEffect(() => {
-    if (countdown === null) return
-    if (countdown === 0) {
+  // Cancelling here does nothing at all — no print, no clearing, no redirect.
+  // Confirming does all three: `window.print()` blocks until the dialog is
+  // dismissed, so the lines after it run once the user is finished with it.
+  const handleConfirm = () => {
+    setConfirmOpen(false)
+    // One frame, so the confirmation is off screen before the print dialog opens.
+    requestAnimationFrame(() => {
+      window.print()
+      reset()
       router.push('/thank-you')
-      return
-    }
-
-    const timer = setTimeout(
-      () => setCountdown((value) => (value === null ? null : value - 1)),
-      1000,
-    )
-    return () => clearTimeout(timer)
-  }, [countdown, router])
-
-  const handleDownload = () => {
-    setPrinting(true)
-    // Let the state flush before the (blocking) print dialog opens.
-    requestAnimationFrame(() => window.print())
+    })
   }
 
   return (
@@ -77,37 +57,37 @@ export function PreviewPanel() {
         </div>
 
         <Button
-          onClick={handleDownload}
-          disabled={empty || printing}
+          onClick={() => setConfirmOpen(true)}
+          disabled={empty}
           size="sm"
           title={empty ? 'Add some details first' : 'Open the print dialog and save as PDF'}
         >
           <Download />
-          {printing ? 'Preparing…' : 'Download PDF'}
+          Download PDF
         </Button>
       </header>
 
-      {countdown !== null && (
-        <div className="no-print flex shrink-0 items-center justify-between gap-3 border-b border-border bg-accent/10 px-4 py-2.5 animate-fade-in sm:px-5">
-          <p className="min-w-0 text-sm text-foreground">
-            Next steps in <span className="tabular-nums">{countdown}</span>s
-            <span className="hidden text-muted-foreground sm:inline">
-              {' '}
-              — stay here if you cancelled.
-            </span>
-          </p>
-
-          <div className="flex shrink-0 items-center gap-1.5">
-            <Button variant="outline" size="xs" onClick={() => setCountdown(null)}>
-              Stay here
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="no-print max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Download your CV?</DialogTitle>
+            <DialogDescription>
+              Give it one last read first — your name, your contact details and your dates.
+              Downloading also clears the CV from this browser, so the PDF you save will be your
+              only copy.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
             </Button>
-            <Link href="/thank-you" className={buttonVariants({ size: 'xs' })}>
-              Go now
-              <ArrowRight />
-            </Link>
-          </div>
-        </div>
-      )}
+            <Button onClick={handleConfirm}>
+              <Download />
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex-1 overflow-y-auto scrollbar-slim bg-muted/40 p-4 sm:p-6 lg:p-8">
         {empty ? (
