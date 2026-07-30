@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Download, FileWarning } from 'lucide-react'
 
 import { useCV } from '@/lib/cv-context'
 import { TEMPLATES, isCVEmpty } from '@/lib/cv-sections'
+import { exportElementToPdf } from '@/lib/export-pdf'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -24,30 +25,42 @@ export function PreviewPanel() {
   const { cvData, template, typography, reset } = useCV()
   const router = useRouter()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
+  const paperRef = useRef<HTMLDivElement>(null)
 
   const empty = isCVEmpty(cvData)
   const activeTemplate = TEMPLATES.find((item) => item.id === template)
 
-  // Cancelling here does nothing at all — no print, no clearing, no redirect.
-  // Confirming does all three, but only once printing has actually finished.
-  const handleConfirm = () => {
-    setConfirmOpen(false)
-    // One frame, so the confirmation is off screen before the print dialog opens.
-    requestAnimationFrame(() => {
-      // `window.print()` blocks synchronously on desktop, so `reset()` and the
-      // redirect used to just follow it directly. Mobile Safari/Chrome's print
-      // flow is a native share/print sheet that does not block the same way —
-      // those two ran while it was still opening, wiping the CV and navigating
-      // away before the OS had captured anything, which is what exported a
-      // blank PDF. `afterprint` fires once printing is actually done, on both.
-      const finish = () => {
-        window.removeEventListener('afterprint', finish)
-        reset()
-        router.push('/thank-you')
-      }
-      window.addEventListener('afterprint', finish)
-      window.print()
-    })
+  // Cancelling does nothing at all — no export, no clearing, no redirect.
+  // Confirming does all three, but only once the PDF has actually been built.
+  //
+  // This used to call `window.print()` and rely on the browser's native print
+  // pipeline (`@media print` CSS + the OS print dialog). That works on
+  // desktop, but Android hands printing off to its own OS print service
+  // rather than rendering it itself, and that service did not reliably apply
+  // this page's CSS — it ignored the declared A4 size and exported a blank
+  // PDF. Rasterizing #cv-print-root ourselves and paginating it manually
+  // (lib/export-pdf.ts) sidesteps that pipeline entirely, so the result is
+  // identical on every device instead of depending on each one's print engine.
+  const handleConfirm = async () => {
+    const paper = paperRef.current
+    if (!paper) return
+
+    setDownloadError(null)
+    setDownloading(true)
+    try {
+      const name = cvData.personalInfo.fullName.trim() || 'CV'
+      await exportElementToPdf(paper, `${name}.pdf`)
+      setConfirmOpen(false)
+      reset()
+      router.push('/thank-you')
+    } catch (error) {
+      console.error('[pdf export]', error)
+      setDownloadError('Could not generate the PDF. Try again in a moment.')
+    } finally {
+      setDownloading(false)
+    }
   }
 
   return (
@@ -69,14 +82,14 @@ export function PreviewPanel() {
           onClick={() => setConfirmOpen(true)}
           disabled={empty}
           size="sm"
-          title={empty ? 'Add some details first' : 'Open the print dialog and save as PDF'}
+          title={empty ? 'Add some details first' : 'Generate a PDF and save it'}
         >
           <Download />
           Download PDF
         </Button>
       </header>
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <Dialog open={confirmOpen} onOpenChange={(open) => !downloading && setConfirmOpen(open)}>
         <DialogContent className="no-print max-w-sm">
           <DialogHeader>
             <DialogTitle>Download your CV?</DialogTitle>
@@ -86,13 +99,22 @@ export function PreviewPanel() {
               only copy.
             </DialogDescription>
           </DialogHeader>
+
+          {downloadError && (
+            <p className="text-sm leading-relaxed text-destructive">{downloadError}</p>
+          )}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              disabled={downloading}
+            >
               Cancel
             </Button>
-            <Button onClick={handleConfirm}>
+            <Button onClick={handleConfirm} disabled={downloading}>
               <Download />
-              Download
+              {downloading ? 'Generating…' : 'Download'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -103,6 +125,7 @@ export function PreviewPanel() {
           <EmptyState />
         ) : (
           <div
+            ref={paperRef}
             id="cv-print-root"
             style={
               {
