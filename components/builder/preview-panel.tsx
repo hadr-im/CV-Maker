@@ -57,7 +57,12 @@ export function PreviewPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cvData, template, typography }),
       })
-      if (!response.ok) throw new Error(`Export failed: ${response.status}`)
+      if (!response.ok) {
+        const body = await response.json().catch(() => null)
+        throw new Error(
+          body?.detail ? `Export failed (${response.status}): ${body.detail}` : `Export failed: ${response.status}`,
+        )
+      }
 
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)

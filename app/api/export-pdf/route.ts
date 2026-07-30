@@ -49,16 +49,19 @@ export async function POST(request: Request) {
 
   const printUrl = new URL(`/print?data=${payload}`, request.url)
 
-  const isServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_VERSION
-  const { executablePath, args, headless } = await resolveChromium(isServerless)
-
-  const browser = await puppeteer.launch({
-    executablePath,
-    args,
-    headless,
-  })
-
+  // Everything from here down — including launching Chromium itself — has to
+  // be inside this try, not just the page operations after it. A failure to
+  // resolve/launch the browser (a missing binary, a bad headless-mode flag)
+  // is exactly the kind of thing likely to fail here, and previously it threw
+  // *before* this function's own try/catch began, so it never hit the
+  // logging or the JSON error body below — just a bare 500 with no detail.
+  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined
   try {
+    const isServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_VERSION
+    const { executablePath, args, headless } = await resolveChromium(isServerless)
+
+    browser = await puppeteer.launch({ executablePath, args, headless })
+
     const page = await browser.newPage()
     await page.goto(printUrl.toString(), { waitUntil: 'networkidle0' })
     await page.emulateMediaType('print')
@@ -77,9 +80,19 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('[export-pdf]', error)
-    return Response.json({ error: 'Failed to generate PDF' }, { status: 500 })
+    // TEMP: surfaced to the client while tracking down the production-only
+    // failure — narrow this back to a generic message once it's fixed, since
+    // stack traces shouldn't normally reach the browser.
+    return Response.json(
+      {
+        error: 'Failed to generate PDF',
+        detail: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      { status: 500 },
+    )
   } finally {
-    await browser.close()
+    await browser?.close()
   }
 }
 
