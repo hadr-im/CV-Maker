@@ -629,27 +629,3 @@
     break-inside: avoid;
   }
 }
-
-/* PDF export (lib/export-pdf.ts) ------------------------------------------ */
-
-/* Same visual result as the `@media print` block above, but toggled by a
-   class instead of an actual print context. Android hands `window.print()`
-   off to the OS's own print service rather than rendering it itself, and
-   that service does not reliably apply page CSS — it ignored `@page` and
-   produced a blank PDF. Export instead rasterizes #cv-print-root directly, so
-   these rules are applied by JS right before that capture, not by the
-   browser's print engine. No `body *` visibility hiding is needed here: the
-   capture only ever reads this one element, never the rest of the page. */
-#cv-print-root.pdf-exporting {
-  border-radius: 0;
-  box-shadow: none;
-}
-
-#cv-print-root.pdf-exporting .print-container {
-  padding: 11mm;
-}
-
-#cv-print-root.pdf-exporting a {
-  color: #17171a;
-  text-decoration: none;
-}

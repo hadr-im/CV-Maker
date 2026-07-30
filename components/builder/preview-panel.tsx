@@ -1,12 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Download, FileWarning } from 'lucide-react'
 
 import { useCV } from '@/lib/cv-context'
 import { TEMPLATES, isCVEmpty } from '@/lib/cv-sections'
-import { exportElementToPdf } from '@/lib/export-pdf'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,7 +26,6 @@ export function PreviewPanel() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState<string | null>(null)
-  const paperRef = useRef<HTMLDivElement>(null)
 
   const empty = isCVEmpty(cvData)
   const activeTemplate = TEMPLATES.find((item) => item.id === template)
@@ -35,23 +33,41 @@ export function PreviewPanel() {
   // Cancelling does nothing at all — no export, no clearing, no redirect.
   // Confirming does all three, but only once the PDF has actually been built.
   //
-  // This used to call `window.print()` and rely on the browser's native print
-  // pipeline (`@media print` CSS + the OS print dialog). That works on
-  // desktop, but Android hands printing off to its own OS print service
-  // rather than rendering it itself, and that service did not reliably apply
-  // this page's CSS — it ignored the declared A4 size and exported a blank
-  // PDF. Rasterizing #cv-print-root ourselves and paginating it manually
-  // (lib/export-pdf.ts) sidesteps that pipeline entirely, so the result is
-  // identical on every device instead of depending on each one's print engine.
+  // The PDF itself is generated server-side (app/api/export-pdf), by driving
+  // a real headless browser rather than rendering here in the visitor's own
+  // one. Two things were tried and rejected first:
+  //  1. `window.print()` against the browser's native print pipeline. Works
+  //     on desktop, but Android hands printing off to the OS's own print
+  //     service rather than rendering it itself, and that service did not
+  //     reliably apply this page's CSS — it ignored the declared A4 size and
+  //     exported a blank PDF.
+  //  2. Rasterizing the preview to a canvas client-side and assembling that
+  //     into a PDF image-by-image. That sidestepped the OS print service, but
+  //     the result has no real text or clickable links — just a picture of
+  //     the CV — which breaks ATS parsing and every href on the page.
+  // A single controlled Chromium instance on the server produces genuine
+  // HTML output (selectable text, working links) and behaves identically
+  // regardless of which device or browser asked for the download.
   const handleConfirm = async () => {
-    const paper = paperRef.current
-    if (!paper) return
-
     setDownloadError(null)
     setDownloading(true)
     try {
+      const response = await fetch('/api/export-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cvData, template, typography }),
+      })
+      if (!response.ok) throw new Error(`Export failed: ${response.status}`)
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
       const name = cvData.personalInfo.fullName.trim() || 'CV'
-      await exportElementToPdf(paper, `${name}.pdf`)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${name}.pdf`
+      link.click()
+      URL.revokeObjectURL(url)
+
       setConfirmOpen(false)
       reset()
       router.push('/thank-you')
@@ -125,7 +141,6 @@ export function PreviewPanel() {
           <EmptyState />
         ) : (
           <div
-            ref={paperRef}
             id="cv-print-root"
             style={
               {
