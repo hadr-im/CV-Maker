@@ -29,15 +29,24 @@ export function PreviewPanel() {
   const activeTemplate = TEMPLATES.find((item) => item.id === template)
 
   // Cancelling here does nothing at all — no print, no clearing, no redirect.
-  // Confirming does all three: `window.print()` blocks until the dialog is
-  // dismissed, so the lines after it run once the user is finished with it.
+  // Confirming does all three, but only once printing has actually finished.
   const handleConfirm = () => {
     setConfirmOpen(false)
     // One frame, so the confirmation is off screen before the print dialog opens.
     requestAnimationFrame(() => {
+      // `window.print()` blocks synchronously on desktop, so `reset()` and the
+      // redirect used to just follow it directly. Mobile Safari/Chrome's print
+      // flow is a native share/print sheet that does not block the same way —
+      // those two ran while it was still opening, wiping the CV and navigating
+      // away before the OS had captured anything, which is what exported a
+      // blank PDF. `afterprint` fires once printing is actually done, on both.
+      const finish = () => {
+        window.removeEventListener('afterprint', finish)
+        reset()
+        router.push('/thank-you')
+      }
+      window.addEventListener('afterprint', finish)
       window.print()
-      reset()
-      router.push('/thank-you')
     })
   }
 
