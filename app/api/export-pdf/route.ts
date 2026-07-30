@@ -50,12 +50,12 @@ export async function POST(request: Request) {
   const printUrl = new URL(`/print?data=${payload}`, request.url)
 
   const isServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_VERSION
-  const { executablePath, args } = await resolveChromium(isServerless)
+  const { executablePath, args, headless } = await resolveChromium(isServerless)
 
   const browser = await puppeteer.launch({
     executablePath,
     args,
-    headless: true,
+    headless,
   })
 
   try {
@@ -91,12 +91,26 @@ export async function POST(request: Request) {
  * so local dev uses full `puppeteer`'s own bundled browser instead. The
  * dynamic import keeps `puppeteer` (a devDependency) out of the production
  * bundle — it's only ever reached when `isServerless` is false.
+ *
+ * @sparticuz/chromium's binary is specifically a `headless_shell` build (see
+ * its README) — it does not support Puppeteer's "new" headless mode, which
+ * `headless: true` requests on recent Puppeteer versions. `headless: 'shell'`
+ * plus `puppeteer.defaultArgs` merging in chromium.args is that package's own
+ * documented usage. The full local `puppeteer` build has no such constraint.
  */
 async function resolveChromium(isServerless: boolean) {
   if (isServerless) {
     const chromium = (await import('@sparticuz/chromium')).default
-    return { executablePath: await chromium.executablePath(), args: chromium.args }
+    return {
+      executablePath: await chromium.executablePath(),
+      args: await puppeteer.defaultArgs({ args: chromium.args, headless: 'shell' }),
+      headless: 'shell' as const,
+    }
   }
   const puppeteerFull = await import('puppeteer')
-  return { executablePath: await puppeteerFull.default.executablePath(), args: [] as string[] }
+  return {
+    executablePath: await puppeteerFull.default.executablePath(),
+    args: [] as string[],
+    headless: true as const,
+  }
 }
